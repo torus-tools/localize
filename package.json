@@ -1,0 +1,16 @@
+{
+  "name": "arjan_translations",
+  "version": "1.0.0",
+  "description": "uses AWS translations to parse website and translate text",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "translations",
+    "aws",
+    "node"
+  ],
+  "author": "gabriel kardonski",
+  "license": "MIT"
+}
