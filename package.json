@@ -12,5 +12,9 @@
     "node"
   ],
   "author": "gabriel kardonski",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.606.0",
+    "fs": "0.0.1-security"
+  }
 }
