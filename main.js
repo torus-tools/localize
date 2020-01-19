@@ -31,22 +31,8 @@ var elements = [
   'option',
   'textarea',
   'nav',
-  'header',
   'footer',
 ]
-
-function saveFile(name, to, data) {
-  fs.writeFileSync(name, data.html1);
-  if(name.includes('/')){
-    let filearr = name.split('/')
-    let newname = to + '/' + filearr[1];
-    fs.writeFileSync(newname, data.html2);
-  }
-  else {
-    //console.log(data)
-    fs.writeFileSync(`${to}.html`, data.html2);
-  }
-}
 
 function translateHtml(from, to){
   createDir('locales', function(err, data){
@@ -80,7 +66,7 @@ function translateHtml(from, to){
             else {
               var html = data
               var newhtml = data
-              findElements(name, from, to, html, newhtml, function(err, data){
+              findElements(name, from, to, html, function(err, data){
                 if(err) console.log(err)
                 else saveFile(name, to, data)
               })
@@ -97,25 +83,27 @@ function translateHtml(from, to){
   })
 }
 
-function findElements(filename, from, to, html, newhtml, callback){
+function findElements(filename, from, to, html, callback){
+  let body = html.split('</head>')[1]
   for(key of elements){
     let elem = `<${key}`
-    if(html.includes(elem)){
+    if(body.includes(elem)){
       let arr = html.split(elem)
-      for(i = 0; i<arr.length; i++){
+      for(i = 1; i<arr.length; i++){
           let fragment = arr[i];
           let piece = fragment.split(`</${key}>`)[0];
           let attributes = piece.split('>')[0];
           let text = piece.split('>')[1];
           if(text.length >= 1){
             //console.log(text)
-            saveText(filename, html, newhtml, piece, key,  text, attributes, from, to, function(err, data){
-              if(err) callback(err)
+            saveText(filename, piece, key,  text, attributes, from, to, function(err, data){ 
+              if(err) console.log(err)
               else {
-                html = data.html1;
-                newhtml = data.html2
+                console.log('success')
+                saveFile(filename, to, data)
               }
             })
+            
             /* if(text.includes("<")){
               let str = text.split("<")
               if(str[0].length >= 1){
@@ -139,12 +127,10 @@ function findElements(filename, from, to, html, newhtml, callback){
                 }
               })
             }*/
-          }
-          
+          } 
       }
     }
   }
-  callback(null, {"html1":html, "html2":newhtml})
 }
 
 var ignoredElems = [
@@ -156,7 +142,7 @@ var ignoredElems = [
   '\n'
 ]
 
-function ignoreHead(html){
+/* function ignoreHead(html){
   let headbody = html.split('<head>')
   let head = headbody.split('</head>')
   //translate title
@@ -166,7 +152,10 @@ function ignoreHead(html){
     html.replace(ele, "")
   }
   return html
-}
+} */
+
+
+
 
 function ignoreScripts(html){
   let start = '<script';
@@ -180,44 +169,60 @@ function ignoreScripts(html){
   return html
 }
 
-function saveText(filename, html1, html2, piece, key, text, attributes, from, to){
-  text.replace('\t', "")
-  text.replace('\n', "")
-  if (!text.replace(/\s/g, '').length) {
-    //console.log('string only contains whitespace (ie. spaces, tabs or line breaks)');
+function saveFile(name, to, data) {
+  //console.log(data.html2)
+  fs.writeFileSync(name, data.html1);
+  if(name.includes('/')){
+    let filearr = name.split('/')
+    let newname = to + '/' + filearr[1];
+    fs.writeFileSync(newname, data.html2);
   }
   else {
-    let id = text.substr(0, 12).replace(" ", "_");
-    let frag = `<${key}` + piece + `${key}/>`
-    var params = {
-      SourceLanguageCode: from,
-      TargetLanguageCode: to,
-      Text: text
-    };
-    translate.translateText(params, function(err, data) {
-      if (err) console.log(err, err.stack); 
-      else {
-        let translation =  data.TranslatedText;
-        let newpiece = piece.replace(text, translation)
-        //console.log(newpiece)
-        if(attributes.includes("id=")){
-          id = attributes.split('id=')[1];
-          let translatedfrag = `<${key}` + newpiece + `${key}/>`
-          html2.replace(frag, translatedfrag)
-        }
-        else {
-          let newfrag = `<${key}` + `id=${id}` + piece + `${key}/>`
-          html1.replace(frag, newfrag)
-          let newtranslatedfrag = `<${key}` + `id=${id}` + newpiece + `${key}/>`
-          html2.replace(frag, newtranslatedfrag)
-        }
-        addVar(from, id, text)
-        addVar(to, id, translation)
-        return {"html1":html1, "html2":html2}
-      }
-    });
+    //console.log(data)
+    fs.writeFileSync(`${to}.html`, data.html2);
   }
-  
+}
+
+function saveText(filename, piece, key, text, attributes, from, to, callback){
+  var html = fs.readFileSync(filename, 'utf8');
+  var html2 =  html;
+  if(fs.existsSync(`${to}.html`)){
+    html2 = fs.readFileSync(`${to}.html`, 'utf8');
+  } 
+  if(text.replace(/\s/g, '').length){
+    let id = text.substr(0, 12).replace(" ", "_");
+    let frag = `<${key}` + piece + `</${key}>`
+    if(html.includes(frag)){
+      var params = {
+        SourceLanguageCode: from,
+        TargetLanguageCode: to,
+        Text: text
+      };
+      translate.translateText(params, function(err, data) {
+        if (err) console.log(err, err.stack); 
+        else {
+          let translation =  data.TranslatedText;
+          let newpiece = piece.replace(text, translation)
+          console.log(newpiece)
+          if(attributes.includes("id=")){
+            id = attributes.split('id=')[1];
+            let translatedfrag = `<${key}` + newpiece + `</${key}>`
+            html2.replace(frag, translatedfrag)
+          }
+          else {
+            let newfrag = `<${key}` + ` id=${id}` + piece + `</${key}>`
+            html.replace(frag, newfrag)
+            let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
+            console.log(translatedfrag)
+            html2.replace(frag, translatedfrag)
+          }
+          addVar(from, id, text)
+          addVar(to, id, translation)
+          callback(null, {"html1":html, "html2":html2})
+        }
+      });
+    }
+  } 
 }
 
  function addVar(filename, variable, value, callback){
