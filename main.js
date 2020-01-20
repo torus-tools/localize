@@ -4,7 +4,7 @@ require('dotenv').config();
 
 var translate = new AWS.Translate({apiVersion: '2017-07-01'});
 
-var elements = [
+/* var elements = [
   'title',
   'h1', 
   'h2', 
@@ -32,6 +32,10 @@ var elements = [
   'textarea',
   'nav',
   'footer',
+] */
+
+var elements = [
+  'li'
 ]
 
 function translateHtml(from, to){
@@ -45,13 +49,11 @@ function translateHtml(from, to){
           fs.readdirSync(from).forEach(function(name){
             if(name.includes(".html")){
               var html = fs.readFileSync(name, 'utf8')
-              var headless = ignoreHead(html)
-              var scriptless = ignoreScripts(headless)
-              var newhtml = scriptless
-              findElements(name, to, scriptless, newhtml, function(err, data){
+              findElements(name, from, to, html, function(err, data){
                 if(err) console.log(err)
                 else {
-                  console.log('found')//saveFile(name, to, data)
+                  saveFile(name, to, data)
+                  //console.log('YES')//saveFile(name, to, data)
                 }
               })
             }
@@ -68,7 +70,7 @@ function translateHtml(from, to){
               var newhtml = data
               findElements(name, from, to, html, function(err, data){
                 if(err) console.log(err)
-                else console.log('YES')//saveFile(name, to, data)
+                //else console.log('YES')//saveFile(name, to, data)
               })
             }
           })
@@ -85,6 +87,8 @@ function translateHtml(from, to){
 
 function findElements(filename, from, to, html, callback){
   var body = html.split('</head>')[1]
+  let html1 = html
+  let html2 = html
   for(key of elements){
     let elem = `<${key}`
     if(body.includes(elem)){
@@ -92,14 +96,14 @@ function findElements(filename, from, to, html, callback){
       for(i = 1; i<arr.length; i++){
           let fragment = arr[i];
           let piece = fragment.split(`</${key}>`)[0];
-          let attributes = piece.split('>')[0];
-          let text = piece.split('>')[1];
+          let text = piece.split('>');
           if(text.length >= 1){
             //console.log(text)
-            saveText(filename, piece, key,  text, attributes, from, to, function(err, data){ 
+            saveText(filename, html1, html2, piece, key,  text[1], text[0], from, to, function(err, data){ 
               if(err) console.log(err)
               else {
-                console.log('success')
+                callback(null, data)
+                //console.log(text[0])
                 //saveFile(filename, to, data)
               }
             })
@@ -183,16 +187,11 @@ function saveFile(name, to, data) {
   }
 }
 
-function saveText(filename, piece, key, text, attributes, from, to, callback){
-  var html = fs.readFileSync(filename, 'utf8');
-  var html2 =  html;
-  if(fs.existsSync(`${to}.html`)){
-    html2 = fs.readFileSync(`${to}.html`, 'utf8');
-  } 
+function saveText(filename, html1, html2, piece, key, text, attributes, from, to, callback){
   if(text.replace(/\s/g, '').length){
-    let id = text.substr(0, 12).replace(" ", "_");
+    let id = text.substr(0, 12).replace(/\s/g, '_')
     let frag = `<${key}` + piece + `</${key}>`
-    if(html.includes(frag)){
+    if(html1.includes(frag)){
       var params = {
         SourceLanguageCode: from,
         TargetLanguageCode: to,
@@ -207,23 +206,21 @@ function saveText(filename, piece, key, text, attributes, from, to, callback){
           if(attributes.includes("id=")){
             id = attributes.split('id=')[1];
             let translatedfrag = `<${key}` + newpiece + `</${key}>`
-            console.log('yeah')
-            fs.writeFileSync(`${to}.html`, html2.replace(frag, translatedfrag), 'utf8');
+            html2.replace(frag, translatedfrag);
           }
           else {
             let newfrag = `<${key}` + ` id=${id}` + piece + `</${key}>`
-            fs.writeFileSync(filename, html.replace(frag, newfrag), 'utf8');
+            html1.replace(frag, newfrag);
             let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
-            if(html2.includes(frag)){console.log('uhu')}
-            fs.writeFileSync(`${to}.html`, html2.replace(frag, translatedfrag), 'utf8');
+            html2.replace(frag, translatedfrag);
           }
           addVar(from, id, text)
           addVar(to, id, translation)
-          callback(null, {"html1":html, "html2":html2})
+          callback(null, {"html1":html1, "html2":html2})
         }
       });
     }
-  } 
+  }
 }
 
  function addVar(filename, variable, value, callback){
