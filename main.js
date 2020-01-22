@@ -4,7 +4,7 @@ require('dotenv').config();
 
 var translate = new AWS.Translate({apiVersion: '2017-07-01'});
 
-/* var elements = [
+var elements = [
   'title',
   'h1', 
   'h2', 
@@ -32,10 +32,6 @@ var translate = new AWS.Translate({apiVersion: '2017-07-01'});
   'textarea',
   'nav',
   'footer',
-] */
-
-var elements = [
-  'li'
 ]
 
 function translateHtml(from, to){
@@ -96,59 +92,71 @@ function findElements(filename, from, to, callback){
       for(i = 1; i<arr.length; i++){
           let fragment = arr[i];
           let piece = fragment.split(`</${key}>`)[0];
-          let attributes = piece.split('>')[0]
+          let attributes = piece.split('>')[0];
           let text = piece.split('>')[1];
-          
-          if(text.length >= 1){
-            let id = text.substr(0, 12).replace(/\s/g, '_')
-            let frag = `<${key}` + piece + `</${key}>`
-            if(html1.includes(frag)){
-              console.log(text)
-              /* var params = {
-                SourceLanguageCode: from,
-                TargetLanguageCode: to,
-                Text: text
-              };
-              translate.translateText(params, function(err, data) {
-                if (err) console.log(err, err.stack); 
+          let id = text.substr(0, 12).replace(/\s/g, '_')
+          let frag = `<${key}` + piece + `</${key}>`
+          if(text.replace(/\s/g, '').length){
+            if(text.includes("<")){
+              if(text.split("<")[0].replace(/\s/g, '').length){
+                text = text.split("<")[0]
+                id = text.substr(0, 12).replace(/\s/g, '_')
+                if(attributes.includes('id="')){
+                  let preid = attributes.split('id="')[1];
+                  id = preid.split('"')[0]
+                  addVar(from, id, text)
+                }
                 else {
-                  let translation =  data.TranslatedText;
-                  let newpiece = piece.replace(text, translation) */
-                  //console.log(newpiece)
-                  if(attributes.includes('id="')){
-                    let preid = attributes.split('id="')[1];
-                    id = preid.split('"')[0]
-                    addVar(from, id, text)
-                    //let translatedfrag = `<${key}` + newpiece + `</${key}>`
-                    //html2.replace(frag, translatedfrag);
-                  }
-                  else {
-                    let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
-                    html1 = html1.replace(frag, newfrag);
-                    addVar(from, id, text)
-                    //let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
-                    //html2.replace(frag, translatedfrag);
-                  }
-                  //add to json file
-                  
-                  //addVar(to, id, translation)
-                  //callback(null, {"html1":html1, "html2":html2})
-                //}
-              //}); 
-            
-            
-          }
+                  let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
+                  html1 = html1.replace(frag, newfrag);
+                  addVar(from, id, text)
+                }
+              }
+            }
+            else {
+              if(attributes.includes('id="')){
+                let preid = attributes.split('id="')[1];
+                id = preid.split('"')[0]
+                addVar(from, id, text)
+              }
+              else {
+                let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
+                html1 = html1.replace(frag, newfrag);
+                addVar(from, id, text)
+              }
+            }       
         } 
       }
-
-      // save file
       
     }
   }
-  // write file
   fs.writeFileSync(filename, html1);
   callback(null, html1)
 }
+
+function translateLocale(){
+  //create new locale if it doesnt exist to.json
+  //open the json locale from.json fromlocale 
+  //map the objects
+    //translate each item
+  //write locale
+
+
+
+  /* var params = {
+    SourceLanguageCode: from,
+    TargetLanguageCode: to,
+    Text: text
+  };
+  translate.translateText(params, function(err, data) {
+    if (err) console.log(err, err.stack); 
+    else {
+      tolocale[key] = data.translatedText 
+  
+  */
+}
+
+function buildFromLocale(){}
 
 var ignoredElems = [
   '<!DOCTYPE html>',
