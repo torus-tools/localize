@@ -48,12 +48,10 @@ function translateHtml(from, to){
         if(fs.statSync(from).isDirectory()){
           fs.readdirSync(from).forEach(function(name){
             if(name.includes(".html")){
-              var html = fs.readFileSync(name, 'utf8')
-              findElements(name, from, to, html, function(err, data){
+              findElements(name, from, to, function(err, data){
                 if(err) console.log(err)
                 else {
-                  saveFile(name, to, data)
-                  //console.log('YES')//saveFile(name, to, data)
+                  console.log(data)
                 }
               })
             }
@@ -68,7 +66,7 @@ function translateHtml(from, to){
             else {
               var html = data
               var newhtml = data
-              findElements(name, from, to, html, function(err, data){
+              findElements(name, from, to, function(err, data){
                 if(err) console.log(err)
                 //else console.log('YES')//saveFile(name, to, data)
               })
@@ -85,10 +83,12 @@ function translateHtml(from, to){
   })
 }
 
-function findElements(filename, from, to, html, callback){
+function findElements(filename, from, to, callback){
+  //read file
+  var html = fs.readFileSync(filename, 'utf8')
   var body = html.split('</head>')[1]
   let html1 = html
-  let html2 = html
+  //let html2 = html
   for(key of elements){
     let elem = `<${key}`
     if(body.includes(elem)){
@@ -96,45 +96,58 @@ function findElements(filename, from, to, html, callback){
       for(i = 1; i<arr.length; i++){
           let fragment = arr[i];
           let piece = fragment.split(`</${key}>`)[0];
-          let text = piece.split('>');
+          let attributes = piece.split('>')[0]
+          let text = piece.split('>')[1];
+          
           if(text.length >= 1){
-            //console.log(text)
-            saveText(filename, html1, html2, piece, key,  text[1], text[0], from, to, function(err, data){ 
-              if(err) console.log(err)
-              else {
-                callback(null, data)
-                //console.log(text[0])
-                //saveFile(filename, to, data)
-              }
-            })
-            
-            /* if(text.includes("<")){
-              let str = text.split("<")
-              if(str[0].length >= 1){
-                saveText(filename, html, newhtml, piece, key, str[0], attributes, from, to, function(err, data){
-                  if(err) callback(err)
-                  else {
-                    html = data.html1;
-                    newhtml = data.html2
-                  }
-                })
-              }
-              let subelems = '<'+ str[1]
-              findElements(subelems, from, to, html, newhtml, callback)
-            }
-            else {
-              saveText(filename, html, newhtml, piece, key,  text, attributes, from, to, function(err, data){
-                if(err) callback(err)
+            let id = text.substr(0, 12).replace(/\s/g, '_')
+            let frag = `<${key}` + piece + `</${key}>`
+            if(html1.includes(frag)){
+              console.log(text)
+              /* var params = {
+                SourceLanguageCode: from,
+                TargetLanguageCode: to,
+                Text: text
+              };
+              translate.translateText(params, function(err, data) {
+                if (err) console.log(err, err.stack); 
                 else {
-                  html = data.html1;
-                  newhtml = data.html2
-                }
-              })
-            }*/
-          } 
+                  let translation =  data.TranslatedText;
+                  let newpiece = piece.replace(text, translation) */
+                  //console.log(newpiece)
+                  if(attributes.includes('id="')){
+                    let preid = attributes.split('id="')[1];
+                    id = preid.split('"')[0]
+                    addVar(from, id, text)
+                    //let translatedfrag = `<${key}` + newpiece + `</${key}>`
+                    //html2.replace(frag, translatedfrag);
+                  }
+                  else {
+                    let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
+                    html1 = html1.replace(frag, newfrag);
+                    addVar(from, id, text)
+                    //let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
+                    //html2.replace(frag, translatedfrag);
+                  }
+                  //add to json file
+                  
+                  //addVar(to, id, translation)
+                  //callback(null, {"html1":html1, "html2":html2})
+                //}
+              //}); 
+            
+            
+          }
+        } 
       }
+
+      // save file
+      
     }
   }
+  // write file
+  fs.writeFileSync(filename, html1);
+  callback(null, html1)
 }
 
 var ignoredElems = [
