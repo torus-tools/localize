@@ -88,6 +88,7 @@ function findElements(filename, from, to, callback){
   var html = fs.readFileSync(filename, 'utf8')
   var body = html.split('</head>')[1]
   let html1 = html
+  let html2 = html
   //let html2 = html
   for(key of elements){
     let elem = `<${key}`
@@ -103,38 +104,40 @@ function findElements(filename, from, to, callback){
             let id = text.substr(0, 12).replace(/\s/g, '_')
             let frag = `<${key}` + piece + `</${key}>`
             if(html1.includes(frag)){
-              console.log(text)
-              /* var params = {
+              //console.log(text)
+              var params = {
                 SourceLanguageCode: from,
                 TargetLanguageCode: to,
                 Text: text
               };
               translate.translateText(params, function(err, data) {
                 if (err) console.log(err, err.stack); 
-                else {
+                else { 
                   let translation =  data.TranslatedText;
-                  let newpiece = piece.replace(text, translation) */
-                  //console.log(newpiece)
+                  let newpiece = piece.replace(text, translation)
+                  console.log(translation)
                   if(attributes.includes('id="')){
                     let preid = attributes.split('id="')[1];
                     id = preid.split('"')[0]
                     addVar(from, id, text)
-                    //let translatedfrag = `<${key}` + newpiece + `</${key}>`
-                    //html2.replace(frag, translatedfrag);
+                    let translatedfrag = `<${key}` + newpiece + `</${key}>`
+                    html2 = html2.replace(frag, translatedfrag);
+                    addVar(to, id, translation)
                   }
                   else {
                     let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
                     html1 = html1.replace(frag, newfrag);
                     addVar(from, id, text)
-                    //let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
-                    //html2.replace(frag, translatedfrag);
+                    let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
+                    html2 = html2.replace(frag, translatedfrag);
+                    addVar(to, id, translation)
                   }
                   //add to json file
                   
                   //addVar(to, id, translation)
                   //callback(null, {"html1":html1, "html2":html2})
-                //}
-              //}); 
+                }
+              }); 
             
             
           }
@@ -147,6 +150,7 @@ function findElements(filename, from, to, callback){
   }
   // write file
   fs.writeFileSync(filename, html1);
+  fs.writeFileSync(`${to}.html`, html2);
   callback(null, html1)
 }
 
