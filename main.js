@@ -66,7 +66,12 @@ function translateHtml(from, to){
                 else{
                   translateLocale(name, from, to, data, function(err, data){
                     if(err) console.log(err)
-                    else console.log(data)
+                    else{
+                      buildFromLocale(name, from, to, function(err, data){
+                        if(err) console.log(err)
+                        else console.log('All Done!')
+                      })
+                    }
                   })
                 }
               })
@@ -162,7 +167,7 @@ function translateLocale(filename, from, to, size, callback){
         translation[key] = data.TranslatedText
         addVar(to, key, data.TranslatedText)
         i += 1
-        console.log(size, i)  
+        console.log(i, '/', size)  
         if(i >= size){
           callback(null, translation)
         }
@@ -171,45 +176,56 @@ function translateLocale(filename, from, to, size, callback){
   })   
 }
 
-function buildFromLocale(){}
-
-var ignoredElems = [
-  '<!DOCTYPE html>',
-  '<html lang="en">',
-  '</body>',
-  '</html>',
-  '\t',
-  '\n'
-]
-
-/* function ignoreHead(html){
-  let headbody = html.split('<head>')
-  let head = headbody.split('</head>')
-  //translate title
-  //translate description
-  html.replace(head, "")
-  for(ele of ignoredElems){
-    html.replace(ele, "")
-  }
-  return html
-} */
-
-
-
-
-function ignoreScripts(html){
-  let start = '<script';
-  let ending = '</script>' 
-  if(html.includes(start)){
-    let arr = html.split(start)
-    for(script of arr){
-      script.replace(script.split(ending)[0], "")
+function buildFromLocale(filename, from, to, callback){
+  let rawdata = fs.readFileSync(`locales/${to}.json`, 'utf8'); 
+  var translations = JSON.parse(rawdata); 
+  var html = fs.readFileSync(filename, 'utf8')
+  var body = html.split('</head>')[1]
+  let html2 = html
+  for(key of elements){
+    let elem = `<${key}`
+    if(body.includes(elem)){
+      let arr = body.split(elem)
+      for(i = 1; i<arr.length; i++){
+          let fragment = arr[i];
+          let piece = fragment.split(`</${key}>`)[0];
+          let attributes = piece.split('>')[0];
+          let text = piece.split('>')[1];
+          let id = text.substr(0, 12).replace(/\s/g, '_')
+          let frag = `<${key}` + piece + `</${key}>`
+          if(text.replace(/\s/g, '').length){
+            if(text.includes("<")){
+              if(text.split("<")[0].replace(/\s/g, '').length){
+                text = text.split("<")[0]
+                id = text.substr(0, 12).replace(/\s/g, '_')
+                if(attributes.includes('id="')){
+                  let preid = attributes.split('id="')[1];
+                  id = preid.split('"')[0]
+                  let translatedpiece = piece.replace(text, translations[id])
+                  let newfrag = `<${key}` + ` id="${id}"` + translatedpiece + `</${key}>`
+                  html2 = html2.replace(frag, newfrag);
+                }
+              }
+            }
+            else {
+              if(attributes.includes('id="')){
+                let preid = attributes.split('id="')[1];
+                id = preid.split('"')[0]
+                let translatedpiece = piece.replace(text, translations[id])
+                let newfrag = `<${key}` + ` id="${id}"` + translatedpiece + `</${key}>`
+                html2 = html2.replace(frag, newfrag);
+              }
+            }       
+        } 
+      }
+      
     }
   }
-  return html
+  fs.writeFileSync(`${to}.html`, html2);
+  callback(null, 'success')
 }
 
- function addVar(filename, variable, value, callback){
+function addVar(filename, variable, value, callback){
   let rawdata = fs.readFileSync(`locales/${filename}.json`, 'utf8'); 
   obj = JSON.parse(rawdata); 
   obj[variable] = value;
@@ -260,3 +276,8 @@ function createDir(dir, callback){
 }
 
 translateHtml('en', 'es')
+
+/* buildFromLocale('en.html', 'en', 'es', function(err, data){
+  if(err) console.log(err)
+  else console.log('All Done!')
+}) */
