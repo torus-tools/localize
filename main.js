@@ -17,7 +17,6 @@ var elements = [
   'div',
   'span',
   'small',
-  'img',
   'table',
   'thead',
   'tbody',
@@ -113,6 +112,7 @@ function CreateLocale(file, filename, from, to, callback){
   var size = 0
   let html1 = html
   //let html2 = html
+  //ignore all images
   for(key of elements){
     let elem = `<${key}`
     if(body.includes(elem)){
@@ -124,6 +124,8 @@ function CreateLocale(file, filename, from, to, callback){
           let text = piece.split('>')[1];
           id = text.substr(0, 12).replace(/\s/g, '_').replace(`'`, '_').replace(',', '_').replace("(","").replace(")", '_') + size
           let frag = `<${key}` + piece + `</${key}>`
+          
+          //if text.includes("img") text = text.replace(img, "")
           if(text.replace(/\s/g, '').length){
             if(text.includes("<")){
               if(text.split("<")[0].replace(/\s/g, '').length){
