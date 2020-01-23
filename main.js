@@ -38,8 +38,7 @@ function translateHtml(from, to){
   createDir('locales', function(err, data){
     if(err) console.log(err)
     else{
-      createFile(`locales/${from}.json`, '{}')
-      createFile(`locales/${to}.json`, '{}')  
+      createFile(`locales/${from}.json`, '{}') 
       if(fs.existsSync(from)){
         if(fs.statSync(from).isDirectory()){
           fs.readdirSync(from).forEach(function(name){
@@ -64,7 +63,12 @@ function translateHtml(from, to){
               var newhtml = data
               findElements(name, from, to, function(err, data){
                 if(err) console.log(err)
-                //else console.log('YES')//saveFile(name, to, data)
+                else{
+                  translateLocale(name, from, to, data, function(err, data){
+                    if(err) console.log(err)
+                    else console.log(data)
+                  })
+                }
               })
             }
           })
@@ -83,6 +87,7 @@ function findElements(filename, from, to, callback){
   //read file
   var html = fs.readFileSync(filename, 'utf8')
   var body = html.split('</head>')[1]
+  var size = 0
   let html1 = html
   //let html2 = html
   for(key of elements){
@@ -105,11 +110,13 @@ function findElements(filename, from, to, callback){
                   let preid = attributes.split('id="')[1];
                   id = preid.split('"')[0]
                   addVar(from, id, text)
+                  size += 1
                 }
                 else {
                   let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
                   html1 = html1.replace(frag, newfrag);
                   addVar(from, id, text)
+                  size += 1
                 }
               }
             }
@@ -118,11 +125,13 @@ function findElements(filename, from, to, callback){
                 let preid = attributes.split('id="')[1];
                 id = preid.split('"')[0]
                 addVar(from, id, text)
+                size +=1
               }
               else {
                 let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
                 html1 = html1.replace(frag, newfrag);
                 addVar(from, id, text)
+                size += 1
               }
             }       
         } 
@@ -131,29 +140,35 @@ function findElements(filename, from, to, callback){
     }
   }
   fs.writeFileSync(filename, html1);
-  callback(null, html1)
+  callback(null, size)
 }
 
-function translateLocale(){
-  //create new locale if it doesnt exist to.json
-  //open the json locale from.json fromlocale 
-  //map the objects
-    //translate each item
-  //write locale
-
-
-
-  /* var params = {
-    SourceLanguageCode: from,
-    TargetLanguageCode: to,
-    Text: text
-  };
-  translate.translateText(params, function(err, data) {
-    if (err) console.log(err, err.stack); 
-    else {
-      tolocale[key] = data.translatedText 
-  
-  */
+function translateLocale(filename, from, to, size, callback){
+  createFile(`locales/${to}.json`, '{}')
+  var translation = {}
+  let rawdata = fs.readFileSync(`locales/${from}.json`, 'utf8'); 
+  let input = JSON.parse(rawdata);
+  let i = 0;
+  console.log(input)
+  Object.keys(input).map(function(key, index){
+    var params = {
+      SourceLanguageCode: from,
+      TargetLanguageCode: to,
+      Text: input[key]
+    };
+    translate.translateText(params, function(err, data) {
+      if (err) console.log(err, err.stack); 
+      else {
+        translation[key] = data.TranslatedText
+        addVar(to, key, data.TranslatedText)
+        i += 1
+        console.log(size, i)  
+        if(i >= size){
+          callback(null, translation)
+        }
+      }
+    })
+  })   
 }
 
 function buildFromLocale(){}
@@ -192,56 +207,6 @@ function ignoreScripts(html){
     }
   }
   return html
-}
-
-function saveFile(name, to, data) {
-  //console.log(data.html2)
-  fs.writeFileSync(name, data.html1);
-  if(name.includes('/')){
-    let filearr = name.split('/')
-    let newname = to + '/' + filearr[1];
-    fs.writeFileSync(newname, data.html2);
-  }
-  else {
-    //console.log(data)
-    fs.writeFileSync(`${to}.html`, data.html2);
-  }
-}
-
-function saveText(filename, html1, html2, piece, key, text, attributes, from, to, callback){
-  if(text.replace(/\s/g, '').length){
-    let id = text.substr(0, 12).replace(/\s/g, '_')
-    let frag = `<${key}` + piece + `</${key}>`
-    if(html1.includes(frag)){
-      var params = {
-        SourceLanguageCode: from,
-        TargetLanguageCode: to,
-        Text: text
-      };
-      translate.translateText(params, function(err, data) {
-        if (err) console.log(err, err.stack); 
-        else {
-          let translation =  data.TranslatedText;
-          let newpiece = piece.replace(text, translation)
-          //console.log(newpiece)
-          if(attributes.includes("id=")){
-            id = attributes.split('id=')[1];
-            let translatedfrag = `<${key}` + newpiece + `</${key}>`
-            html2.replace(frag, translatedfrag);
-          }
-          else {
-            let newfrag = `<${key}` + ` id=${id}` + piece + `</${key}>`
-            html1.replace(frag, newfrag);
-            let translatedfrag = `<${key}` + ` id=${id}` + newpiece + `</${key}>`
-            html2.replace(frag, translatedfrag);
-          }
-          addVar(from, id, text)
-          addVar(to, id, translation)
-          callback(null, {"html1":html1, "html2":html2})
-        }
-      });
-    }
-  }
 }
 
  function addVar(filename, variable, value, callback){
