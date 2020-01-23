@@ -30,67 +30,85 @@ var elements = [
   'select',
   'option',
   'textarea',
+  'button',
   'nav',
   'footer',
 ]
 
-function translateHtml(from, to){
+function TranslateSite(from, to){
   createDir('locales', function(err, data){
     if(err) console.log(err)
     else{
-      createFile(`locales/${from}.json`, '{}') 
-      if(fs.existsSync(from)){
-        if(fs.statSync(from).isDirectory()){
-          fs.readdirSync(from).forEach(function(name){
-            if(name.includes(".html")){
-              findElements(name, from, to, function(err, data){
-                if(err) console.log(err)
-                else {
-                  console.log(data)
-                }
-              })
-            }
-          })
-        }
-      }
-      else if(fs.existsSync(`${from}.html`)) {
-        let name = `${from}.html`
-        if(fs.statSync(name).isFile()){
-          fs.readFile(name, 'utf8', function(err, data){
-            if(err) console.log(err)
-            else {
-              var html = data
-              var newhtml = data
-              findElements(name, from, to, function(err, data){
-                if(err) console.log(err)
-                else{
-                  translateLocale(name, from, to, data, function(err, data){
+      createDir(`locales/${from}`, function(err, data){
+        if(err) console.log(err)
+        else{
+          if(fs.existsSync(from)){
+            if(fs.statSync(from).isDirectory()){
+              fs.readdirSync(from).forEach(function(filename){
+                if(filename.includes(".html")){
+                  let file = `${from}/${filename}.html`
+                  let name = filename.split[0]
+                  let translation = `${to}/${filename}.html`
+                  createFile(`locales/${from}/${name}.json`, '{}')
+                  CreateLocale(file, name, from, to, function(err, data){
                     if(err) console.log(err)
-                    else{
-                      buildFromLocale(name, from, to, function(err, data){
+                    else {
+                      TranslateLocale(name, from, to, data, function(err, data){
                         if(err) console.log(err)
-                        else console.log('All Done!')
+                        else{
+                          TranslateHtml(name, translation, to, function(err, data){
+                            if(err) console.log(err)
+                            else console.log('All Done!')
+                          })
+                        }
                       })
                     }
                   })
                 }
               })
             }
-          })
+          }
+          else if(fs.existsSync(`${from}.html`)) {
+            let name = from
+            let file = `${from}.html`
+            let translation = `${to}.html`
+            createFile(`locales/${from}/${from}.json`, '{}')
+            if(fs.statSync(`${name}.html`).isFile()){
+              fs.readFile(`${name}.html`, 'utf8', function(err, data){
+                if(err) console.log(err)
+                else {
+                  CreateLocale(file, name, from, to, function(err, data){
+                    if(err) console.log(err)
+                    else{
+                      TranslateLocale(name, from, to, data, function(err, data){
+                        if(err) console.log(err)
+                        else{
+                          TranslateHtml(name, translation, to, function(err, data){
+                            if(err) console.log(err)
+                            else console.log('All Done!')
+                          })
+                        }
+                      })
+                    }
+                  })
+                }
+              })
+            }
+          }
+          else {
+            let err = 'No html file or directory'
+            console.log(err)
+            throw new Error(err)
+          }
         }
-      }
-      else {
-        let err = 'No html file or directory'
-        console.log(err)
-        throw new Error(err)
-      }
+      });
     }
   })
 }
 
-function findElements(filename, from, to, callback){
+function CreateLocale(file, filename, from, to, callback){
   //read file
-  var html = fs.readFileSync(filename, 'utf8')
+  var html = fs.readFileSync(file, 'utf8')
   var body = html.split('</head>')[1]
   var size = 0
   let html1 = html
@@ -104,23 +122,23 @@ function findElements(filename, from, to, callback){
           let piece = fragment.split(`</${key}>`)[0];
           let attributes = piece.split('>')[0];
           let text = piece.split('>')[1];
-          let id = text.substr(0, 12).replace(/\s/g, '_')
+          id = text.substr(0, 12).replace(/\s/g, '_').replace(`'`, '_').replace(',', '_').replace("(","").replace(")", '_') + size
           let frag = `<${key}` + piece + `</${key}>`
           if(text.replace(/\s/g, '').length){
             if(text.includes("<")){
               if(text.split("<")[0].replace(/\s/g, '').length){
                 text = text.split("<")[0]
-                id = text.substr(0, 12).replace(/\s/g, '_')
+                id = text.substr(0, 12).replace(/\s/g, '_').replace(`'`, '_').replace(',', '_').replace("(","").replace(")", '_') + size
                 if(attributes.includes('id="')){
                   let preid = attributes.split('id="')[1];
                   id = preid.split('"')[0]
-                  addVar(from, id, text)
+                  addVar(`${from}/${filename}`, id, text)
                   size += 1
                 }
                 else {
                   let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
                   html1 = html1.replace(frag, newfrag);
-                  addVar(from, id, text)
+                  addVar(`${from}/${filename}`, id, text)
                   size += 1
                 }
               }
@@ -129,13 +147,13 @@ function findElements(filename, from, to, callback){
               if(attributes.includes('id="')){
                 let preid = attributes.split('id="')[1];
                 id = preid.split('"')[0]
-                addVar(from, id, text)
+                addVar(`${from}/${filename}`, id, text)
                 size +=1
               }
               else {
                 let newfrag = `<${key}` + ` id="${id}"` + piece + `</${key}>`
                 html1 = html1.replace(frag, newfrag);
-                addVar(from, id, text)
+                addVar(`${from}/${filename}`, id, text)
                 size += 1
               }
             }       
@@ -144,17 +162,22 @@ function findElements(filename, from, to, callback){
       
     }
   }
-  fs.writeFileSync(filename, html1);
+  fs.writeFileSync(`${filename}.html`, html1);
   callback(null, size)
 }
 
-function translateLocale(filename, from, to, size, callback){
-  createFile(`locales/${to}.json`, '{}')
+function TranslateLocale(filename, from, to, size, callback){
+  createDir(`locales/${to}`, function(err, data){
+    if(err) console.log(err)
+    else{
+      createFile(`locales/${to}/${filename}.json`, '{}') 
+    }
+  });
   var translation = {}
-  let rawdata = fs.readFileSync(`locales/${from}.json`, 'utf8'); 
+  let rawdata = fs.readFileSync(`locales/${from}/${filename}.json`, 'utf8'); 
   let input = JSON.parse(rawdata);
   let i = 0;
-  console.log(input)
+  //console.log(input)
   Object.keys(input).map(function(key, index){
     var params = {
       SourceLanguageCode: from,
@@ -165,7 +188,7 @@ function translateLocale(filename, from, to, size, callback){
       if (err) console.log(err, err.stack); 
       else {
         translation[key] = data.TranslatedText
-        addVar(to, key, data.TranslatedText)
+        addVar(`${to}/${filename}`, key, data.TranslatedText)
         i += 1
         console.log(i, '/', size)  
         if(i >= size){
@@ -176,10 +199,10 @@ function translateLocale(filename, from, to, size, callback){
   })   
 }
 
-function buildFromLocale(filename, from, to, callback){
-  let rawdata = fs.readFileSync(`locales/${to}.json`, 'utf8'); 
+function TranslateHtml(filename, translation, to, callback){
+  let rawdata = fs.readFileSync(`locales/${to}/${filename}.json`, 'utf8'); 
   var translations = JSON.parse(rawdata); 
-  var html = fs.readFileSync(filename, 'utf8')
+  var html = fs.readFileSync(`${filename}.html`, 'utf8')
   var body = html.split('</head>')[1]
   let html2 = html
   for(key of elements){
@@ -191,18 +214,17 @@ function buildFromLocale(filename, from, to, callback){
           let piece = fragment.split(`</${key}>`)[0];
           let attributes = piece.split('>')[0];
           let text = piece.split('>')[1];
-          let id = text.substr(0, 12).replace(/\s/g, '_')
           let frag = `<${key}` + piece + `</${key}>`
           if(text.replace(/\s/g, '').length){
             if(text.includes("<")){
               if(text.split("<")[0].replace(/\s/g, '').length){
                 text = text.split("<")[0]
-                id = text.substr(0, 12).replace(/\s/g, '_')
                 if(attributes.includes('id="')){
                   let preid = attributes.split('id="')[1];
                   id = preid.split('"')[0]
-                  let translatedpiece = piece.replace(text, translations[id])
-                  let newfrag = `<${key}` + ` id="${id}"` + translatedpiece + `</${key}>`
+                  let translatedpiece = piece.replace(`>${text}`, `>${translations[id]}`)
+                  let newfrag = `<${key}` + translatedpiece + `</${key}>`
+                  //console.log(translatedpiece)
                   html2 = html2.replace(frag, newfrag);
                 }
               }
@@ -211,8 +233,9 @@ function buildFromLocale(filename, from, to, callback){
               if(attributes.includes('id="')){
                 let preid = attributes.split('id="')[1];
                 id = preid.split('"')[0]
-                let translatedpiece = piece.replace(text, translations[id])
-                let newfrag = `<${key}` + ` id="${id}"` + translatedpiece + `</${key}>`
+                let translatedpiece = piece.replace(`>${text}`, `>${translations[id]}`)
+                let newfrag = `<${key}` + translatedpiece + `</${key}>`
+                //console.log(translatedpiece)
                 html2 = html2.replace(frag, newfrag);
               }
             }       
@@ -221,16 +244,16 @@ function buildFromLocale(filename, from, to, callback){
       
     }
   }
-  fs.writeFileSync(`${to}.html`, html2);
+  fs.writeFileSync(translation, html2);
   callback(null, 'success')
 }
 
-function addVar(filename, variable, value, callback){
-  let rawdata = fs.readFileSync(`locales/${filename}.json`, 'utf8'); 
+function addVar(file, variable, value, callback){
+  let rawdata = fs.readFileSync(`locales/${file}.json`, 'utf8'); 
   obj = JSON.parse(rawdata); 
   obj[variable] = value;
   jsonString = JSON.stringify(obj);
-  fs.writeFileSync(`locales/${filename}.json`, jsonString);
+  fs.writeFileSync(`locales/${file}.json`, jsonString);
   if(callback && typeof callback === 'function') callback(null, 'Success');
   else return 'Success';
 }
@@ -275,9 +298,4 @@ function createDir(dir, callback){
   }
 }
 
-translateHtml('en', 'es')
-
-/* buildFromLocale('en.html', 'en', 'es', function(err, data){
-  if(err) console.log(err)
-  else console.log('All Done!')
-}) */
+TranslateSite('en', 'es')
