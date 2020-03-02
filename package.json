@@ -1,5 +1,5 @@
 {
-  "name": "arjan_translations",
+  "name": "arjan-translate",
   "version": "1.0.0",
   "description": "uses AWS translations to parse website and translate text",
   "main": "index.js",
@@ -11,11 +11,23 @@
     "aws",
     "node"
   ],
-  "author": "gabriel kardonski",
+  "author": "gkpty",
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.606.0",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gkpty/arjan-translate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gkpty/arjan-translate/issues"
+  },
+  "homepage": "https://github.com/gkpty/arjan-translate#readme"
 }
