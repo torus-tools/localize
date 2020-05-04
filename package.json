@@ -1,6 +1,6 @@
 {
   "name": "arjan-translate",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "uses AWS translations to parse website and translate text",
   "main": "index.js",
   "scripts": {
