@@ -1,5 +1,5 @@
 {
-  "name": "arjan-translate",
+  "name": "arjan-localize",
   "version": "1.1.1",
   "description": "uses AWS translations to parse website and translate text",
   "main": "index.js",
@@ -24,10 +24,10 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gkpty/arjan-translate.git"
+    "url": "git+https://github.com/arjan-tools/localize.git"
   },
   "bugs": {
-    "url": "https://github.com/gkpty/arjan-translate/issues"
+    "url": "https://github.com/arjan-tools/localize/issues"
   },
-  "homepage": "https://github.com/gkpty/arjan-translate#readme"
+  "homepage": "https://github.com/arjan-tools/localize#readme"
 }
