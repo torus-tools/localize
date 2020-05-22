@@ -1,4 +1,4 @@
-var {initBuild, addVar} = require('./lib/Build')
+var {initBuild, addVar, createDir, createFile} = require('./lib/Build')
 var CreateLocale = require('./lib/CreateLocale');
 var TranslateLocale = require('./lib/TranslateLocale');
 var TranslateHtml = require('./lib/TranslateHtml');
@@ -8,6 +8,8 @@ var importCsv = require('./lib/importCsv');
 
 module.exports.Build = initBuild;
 module.exports.AddVar = addVar;
+module.exports.CreateDir = createDir;
+module.exports.createFile = createFile;
 module.exports.CreateLocale = CreateLocale;
 module.exports.TranslateLocale = TranslateLocale;
 module.exports.TranslateHtml = TranslateHtml;
