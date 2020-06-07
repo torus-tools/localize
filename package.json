@@ -1,13 +1,15 @@
 {
   "name": "arjan-localize",
-  "version": "1.1.3",
-  "description": "uses AWS translations to parse website and translate text",
+  "version": "1.1.4",
+  "description": "Automatic localization and translation of static sites. uses AWS translate for translations.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "translations",
+    "localization",
+    "translation",
+    "static sites",
     "aws",
     "node"
   ],
@@ -15,8 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.606.0",
-    "dotenv": "^8.2.0",
-    "fs": "0.0.1-security"
+    "dotenv": "^8.2.0"
   },
   "directories": {
     "lib": "lib"
