@@ -1,6 +1,6 @@
 {
   "name": "arjan-localize",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Automatic localization and translation of static sites. uses AWS translate for translations.",
   "main": "index.js",
   "scripts": {
