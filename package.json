@@ -1,6 +1,6 @@
 {
   "name": "arjan-localize",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Automatic localization and translation of static sites. uses AWS translate for translations.",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   "author": "gkpty",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.606.0",
+    "aws-sdk": "^2.692.0",
     "dotenv": "^8.2.0"
   },
   "directories": {
