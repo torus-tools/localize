@@ -1,6 +1,6 @@
 var assert = require('assert');
 const csvToJson = require('../lib/csvToJson');
-const csvInput = 'ID,en\nHello_World0,"Hello World"\n'
+const csvInput = 'key,en\nHello_World0,"Hello World"\n'
 const expectedJson = {Hello_World0:'Hello World'}
 
 describe('csvToJson', function () {
