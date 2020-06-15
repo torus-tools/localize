@@ -1,3 +1,3 @@
-const exportCsv = require('../lib/exportCsv')
+/* const exportCsv = require('../lib/exportCsv')
 
-exportCsv('es', 'es')
+exportCsv('es', 'es') */
