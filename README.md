@@ -5,7 +5,7 @@
 
 # Arjan Localize
 
-Arjan Localize is node module for automatically localizing and translating html sites. It features a powerful CLI command that allows you to localize multiple pages into multiple languages with a single command and export your content into popular formats like JSON and CSV.   
+Arjan Localize is node module that automatically localizes and translates static sites. It features a powerful CLI command that allows you to localize multiple pages into multiple languages using a single command.  Export a site’s HTML content to JSON or CSV, and import the updated content back to the site seamlessly.
 
  ## What is Localization
 
@@ -15,32 +15,30 @@ A common practice is to create JSON files called locales that contain the text c
 
 ## Automatic localization
 
-Arjan uses the id attributes already present in your html as the keys in the locale. The parser in arjan localize gets all the existing IDs of html elements with text content, and saves them in the locale. If the element didnt have an ID arjan automatically creates an ID for the object with the following format:  The first 12 characters of the text, replacing spaces with underscores and adding the translation index at the end.
+Arjan Localize has a parser that gets all the existing IDs of HTML elements with text content and saves them as key value pairs in a JSON locale. If the element doesn't have an ID, Arjan automatically creates one with the following format:  The first 12 characters of the text, replacing spaces with underscores and adding the translation index at the end.
 
 ## Automatic translation
 
-Arjan localize also helps you to automatically translate your JSON locales and files in up to 54 different languages. It uses AWS’s neural machine translation system which is used in amazon.com. 
+Arjan localize also helps you to translate your JSON locales and files in up to 54 languages. It uses AWS’s neural machine translation system which is used in amazon.com. 
 
 ## Usage
 
-There’s three ways in which you can use arjan localize. The three are listed bellow with their pros and cons.
+There are three ways in which you can use Arjan Localize. The three are listed bellow with their main features:
 
 
 1. **Arjan CLI** 
-    1. pros: 
-        1. translate multiple pages
-        2. bi-directional translation updates
-    2. cons: No GUI. basic terminal usage knowledge
+      1. translate multiple pages
+      2. bi-directional translation updates
+
 2. **The Arjan Localization GUI**
-    1. Pros: 
-        1. GUI
-        2. No AWS account needed.
-    2. cons: 
-        1. only translate a single page at a time
-        2. cannot update translations
+      1. GUI
+      2. No AWS account needed
+      3. Only translate a single page at a time
+      4. Cannot update translations
+      
 3. **Programmatic usage**
-    1. Pros: integrate into other programs and workflows
-    2. Cons: requires setup for each project
+      1. Integrates into other programs and workflows
+      2. Requires setup for each project
     
 ## Arjan translate GUI
 
@@ -73,10 +71,10 @@ Translate locale considers that you can have 3 different routing formats for a m
 2. **file**: You are using the language code as the name of the file. for example `blog/posts/article1/en.html`
 3. **dir:** You are using the language code as the name of the parent directory. i.e. `en/blog/posts/article1.html`
 
-
 - In case 1, a directory named with the language code of your output language and the same file structure (excluding ignored directories and non-html files) will be created in the root of your project.
 - In case 2, translated files will be saved with the name of the output language i.e. `blog/posts/article1/es.html`
 - In Case 3, alike case 1, a directory with the name of the output language will be created in the root.
+
 ## Translation Format
 
 The example compares arjan with i18n; Lets suppose our input is an en.html file with the following content: 
