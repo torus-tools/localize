@@ -99,4 +99,4 @@ Lets suppose that our input string didnt have an id attribute:
 
 Notice that an id with the first 12 characters of the string is created. Caps are lower-cased and spaces are replaced with underscores. A number with the index of the translations is inserted at the end (in case there’s another string that starts with the same 12 chars)
 
-For more information visit the [docs](https://arjan.tools/docs)
+For more information visit the [docs](https://arjan.tools/docs.html)
