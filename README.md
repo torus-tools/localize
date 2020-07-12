@@ -5,7 +5,7 @@
 
 # Arjan Localize
 
-Arjan Localize is node module that automatically localizes and translates static sites. It features a powerful CLI command that allows you to localize multiple pages into multiple languages using a single command.  Export a site’s HTML content to JSON or CSV, and import the updated content back to the site seamlessly.
+Arjan Localize is node module that automatically localizes and translates static websites. It features a powerful CLI command that allows you to localize multiple pages into multiple languages using a single command. Export a website’s HTML content to JSON or CSV, and import the updated content back to the site seamlessly.
 
  ## What is Localization
 
@@ -19,7 +19,7 @@ Arjan Localize has a parser that gets all the existing IDs of HTML elements with
 
 ## Automatic translation
 
-Arjan localize also helps you to translate your JSON locales and files in up to 54 languages. It uses AWS’s neural machine translation system which is used in amazon.com. 
+Arjan localize also helps you to translate your JSON locales and files in up to 54 languages. It uses AWS Translation. 
 
 ## Usage
 
@@ -40,14 +40,15 @@ There are three ways in which you can use Arjan Localize. The three are listed b
       1. Integrates into other programs and workflows
       2. Requires setup for each project
     
-## Arjan translate GUI
-
-Arjan translate has a GUI at [arjan.tools/translate](http://arjan.tools/trans;ate.html). The GUI is a form with a dropzone made with [super easy forms](http://supereasyforms.com) which features a node.js lambda function as its backend. The GUI is pretty limited as you cant update your translations but its good for a one time job especially if you dont like using the terminal. 
-
 ## CLI
+
 1. go into your sites directory `cd SITE_NAME`
 2. run `arjan init SITE_NAME`  Refer to the provider setup section if you haven't used any of the cloud translation APIs.
 3. Run the translate command `arjan translate SITE_NAME [FILENAME]`
+
+## Arjan translate GUI
+
+Arjan translate has a GUI at [arjan.tools/translate](http://arjan.tools/trans;ate.html). The GUI is a form with a dropzone made with [super easy forms](http://supereasyforms.com) which features a node.js lambda function as its backend. The GUI is pretty limited as you cant update your translations but its good for a one time job especially if you dont like using the terminal. 
 
 ## Updating content
 
@@ -99,4 +100,4 @@ Lets suppose that our input string didnt have an id attribute:
 
 Notice that an id with the first 12 characters of the string is created. Caps are lower-cased and spaces are replaced with underscores. A number with the index of the translations is inserted at the end (in case there’s another string that starts with the same 12 chars)
 
-For more information visit the [docs](https://arjan.tools/docs)
+### For more information visit the [docs](https://arjan.tools/docs)
